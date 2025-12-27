@@ -66,53 +66,71 @@ const nextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-  authToken: process.env.SENTRY_AUTH_TOKEN,
+// Only use Sentry if all required variables are present
+const useSentry = process.env.SENTRY_ORG && 
+                  process.env.SENTRY_PROJECT && 
+                  process.env.SENTRY_AUTH_TOKEN;
 
-  // Sourcemap configuration optimized for monorepo
-  sourcemaps: {
-    disable: false,
-    // More comprehensive asset patterns for monorepo
-    assets: [
-      ".next/static/**/*.js",
-      ".next/static/**/*.js.map",
-      ".next/server/**/*.js",
-      ".next/server/**/*.js.map",
-    ],
-    ignore: [
-      "**/node_modules/**",
-      "**/*hot-update*",
-      "**/_buildManifest.js",
-      "**/_ssgManifest.js",
-      "**/*.test.js",
-      "**/*.spec.js",
-    ],
-    deleteSourcemapsAfterUpload: true,
-  },
+let finalConfig = nextConfig;
 
-  // Release configuration
-  release: {
-    create: true,
-    finalize: true,
-    // Use git commit hash for releases in monorepo
-    name: process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || undefined,
-  },
+if (useSentry) {
+  try {
+    finalConfig = withSentryConfig(nextConfig, {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
 
-  // NextJS specific optimizations for monorepo
-  widenClientFileUpload: true,
+      // Sourcemap configuration optimized for monorepo
+      sourcemaps: {
+        disable: false,
+        // More comprehensive asset patterns for monorepo
+        assets: [
+          ".next/static/**/*.js",
+          ".next/static/**/*.js.map",
+          ".next/server/**/*.js",
+          ".next/server/**/*.js.map",
+        ],
+        ignore: [
+          "**/node_modules/**",
+          "**/*hot-update*",
+          "**/_buildManifest.js",
+          "**/_ssgManifest.js",
+          "**/*.test.js",
+          "**/*.spec.js",
+        ],
+        deleteSourcemapsAfterUpload: true,
+      },
 
-  // Additional configuration
-  telemetry: false,
-  silent: process.env.NODE_ENV === 'production',
-  debug: process.env.NODE_ENV === 'development',
+      // Release configuration
+      release: {
+        create: true,
+        finalize: true,
+        // Use git commit hash for releases in monorepo
+        name: process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || undefined,
+      },
 
-  // Error handling for CI/CD
-  errorHandler: (error) => {
-    console.warn("Sentry build error occurred:", error.message);
-    console.warn("This might be due to missing Sentry environment variables or network issues");
-    // Don't fail the build if Sentry upload fails in monorepo context
-    return;
-  },
-});
+      // NextJS specific optimizations for monorepo
+      widenClientFileUpload: true,
+
+      // Additional configuration
+      telemetry: false,
+      silent: process.env.NODE_ENV === 'production',
+      debug: process.env.NODE_ENV === 'development',
+
+      // Error handling for CI/CD
+      errorHandler: (error) => {
+        console.warn("Sentry build error occurred:", error.message);
+        console.warn("This might be due to missing Sentry environment variables or network issues");
+        // Don't fail the build if Sentry upload fails in monorepo context
+        return;
+      },
+    });
+  } catch (error) {
+    console.warn('Failed to configure Sentry, using default config:', error.message);
+    finalConfig = nextConfig;
+  }
+} else {
+  console.warn('Sentry not configured, skipping Sentry setup');
+}
+
+export default finalConfig;

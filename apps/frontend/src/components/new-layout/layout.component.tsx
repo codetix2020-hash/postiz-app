@@ -3,6 +3,7 @@
 import React, { ReactNode, useCallback } from 'react';
 import { Logo } from '@gitroom/frontend/components/new-layout/logo';
 import { Plus_Jakarta_Sans } from 'next/font/google';
+import { ErrorBoundary } from '@gitroom/frontend/components/error-boundary';
 const ModeComponent = dynamic(
   () => import('@gitroom/frontend/components/layout/mode.component'),
   {
@@ -56,7 +57,7 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
   const load = useCallback(async (path: string) => {
     return await (await fetch(path)).json();
   }, []);
-  const { data: user, mutate } = useSWR('/user/self', load, {
+  const { data: user, mutate, error: userError } = useSWR('/user/self', load, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     revalidateIfStale: false,
@@ -64,16 +65,62 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
     refreshWhenHidden: false,
   });
 
-  if (!user) return null;
+  // Show loading state instead of null to prevent blank screen
+  if (!user && !userError) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh',
+        background: '#f0f2f4',
+        color: '#0e0e0e'
+      }}>
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  // Show error state if user fetch fails
+  if (userError) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh',
+        background: '#f0f2f4',
+        color: '#0e0e0e',
+        flexDirection: 'column',
+        gap: '20px'
+      }}>
+        <div>Error loading user. Please refresh the page.</div>
+        <button 
+          onClick={() => window.location.reload()}
+          style={{
+            padding: '10px 20px',
+            background: '#612bd3',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Refresh
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <ContextWrapper user={user}>
-      <CopilotKit
-        credentials="include"
-        runtimeUrl={backendUrl + '/copilot/chat'}
-        showDevConsole={false}
-      >
-        <MantineWrapper>
+    <ErrorBoundary>
+      <ContextWrapper user={user}>
+        <CopilotKit
+          credentials="include"
+          runtimeUrl={backendUrl + '/copilot/chat'}
+          showDevConsole={false}
+        >
+          <MantineWrapper>
           {user.tier === 'FREE' && searchParams.get('check') && (
             <CheckPayment check={searchParams.get('check')!} mutate={mutate} />
           )}
@@ -132,5 +179,6 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
         </MantineWrapper>
       </CopilotKit>
     </ContextWrapper>
+    </ErrorBoundary>
   );
 };

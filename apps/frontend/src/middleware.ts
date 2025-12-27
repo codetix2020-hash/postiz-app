@@ -47,18 +47,18 @@ export async function middleware(request: NextRequest) {
     const response = NextResponse.redirect(
       new URL('/auth/login', nextUrl.href)
     );
-    response.cookies.set('auth', '', {
-      path: '/',
-      ...(!process.env.NOT_SECURED
-        ? {
-            secure: true,
-            httpOnly: true,
-            sameSite: false,
-          }
-        : {}),
-      maxAge: -1,
-      domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
-    });
+      response.cookies.set('auth', '', {
+        path: '/',
+        ...(!process.env.NOT_SECURED
+          ? {
+              secure: true,
+              httpOnly: true,
+              sameSite: false,
+            }
+          : {}),
+        maxAge: -1,
+        domain: process.env.FRONTEND_URL ? getCookieUrlFromDomain(process.env.FRONTEND_URL) : undefined,
+      });
     return response;
   }
 
@@ -95,7 +95,7 @@ export async function middleware(request: NextRequest) {
               secure: true,
               httpOnly: true,
               sameSite: false,
-              domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+              domain: process.env.FRONTEND_URL ? getCookieUrlFromDomain(process.env.FRONTEND_URL) : undefined,
             }
           : {}),
         expires: new Date(Date.now() + 15 * 60 * 1000),
@@ -125,7 +125,7 @@ export async function middleware(request: NextRequest) {
                 secure: true,
                 httpOnly: true,
                 sameSite: false,
-                domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+                domain: process.env.FRONTEND_URL ? getCookieUrlFromDomain(process.env.FRONTEND_URL) : undefined,
               }
             : {}),
           expires: new Date(Date.now() + 15 * 60 * 1000),

@@ -18,6 +18,7 @@ import { FacebookComponent } from '@gitroom/frontend/components/layout/facebook.
 import { headers } from 'next/headers';
 import { headerName } from '@gitroom/react/translation/i18n.config';
 import { HtmlComponent } from '@gitroom/frontend/components/layout/html.component';
+import { ErrorBoundary } from '@gitroom/frontend/components/error-boundary';
 // import dynamicLoad from 'next/dynamic';
 // const SetTimezone = dynamicLoad(
 //   () => import('@gitroom/frontend/components/layout/set.timezone'),
@@ -47,28 +48,28 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       >
         <VariableContextComponent
           storageProvider={
-            process.env.STORAGE_PROVIDER! as 'local' | 'cloudflare'
+            (process.env.STORAGE_PROVIDER || 'local') as 'local' | 'cloudflare'
           }
-          environment={process.env.NODE_ENV!}
-          backendUrl={process.env.NEXT_PUBLIC_BACKEND_URL!}
-          plontoKey={process.env.NEXT_PUBLIC_POLOTNO!}
+          environment={process.env.NODE_ENV || 'production'}
+          backendUrl={process.env.NEXT_PUBLIC_BACKEND_URL || ''}
+          plontoKey={process.env.NEXT_PUBLIC_POLOTNO || ''}
           billingEnabled={!!process.env.STRIPE_PUBLISHABLE_KEY}
-          discordUrl={process.env.NEXT_PUBLIC_DISCORD_SUPPORT!}
-          frontEndUrl={process.env.FRONTEND_URL!}
+          discordUrl={process.env.NEXT_PUBLIC_DISCORD_SUPPORT || ''}
+          frontEndUrl={process.env.FRONTEND_URL || ''}
           isGeneral={!!process.env.IS_GENERAL}
           genericOauth={!!process.env.POSTIZ_GENERIC_OAUTH}
-          oauthLogoUrl={process.env.NEXT_PUBLIC_POSTIZ_OAUTH_LOGO_URL!}
-          oauthDisplayName={process.env.NEXT_PUBLIC_POSTIZ_OAUTH_DISPLAY_NAME!}
-          uploadDirectory={process.env.NEXT_PUBLIC_UPLOAD_STATIC_DIRECTORY!}
-          tolt={process.env.NEXT_PUBLIC_TOLT!}
-          facebookPixel={process.env.NEXT_PUBLIC_FACEBOOK_PIXEL!}
-          telegramBotName={process.env.TELEGRAM_BOT_NAME!}
-          neynarClientId={process.env.NEYNAR_CLIENT_ID!}
+          oauthLogoUrl={process.env.NEXT_PUBLIC_POSTIZ_OAUTH_LOGO_URL || ''}
+          oauthDisplayName={process.env.NEXT_PUBLIC_POSTIZ_OAUTH_DISPLAY_NAME || ''}
+          uploadDirectory={process.env.NEXT_PUBLIC_UPLOAD_STATIC_DIRECTORY || ''}
+          tolt={process.env.NEXT_PUBLIC_TOLT || ''}
+          facebookPixel={process.env.NEXT_PUBLIC_FACEBOOK_PIXEL || ''}
+          telegramBotName={process.env.TELEGRAM_BOT_NAME || ''}
+          neynarClientId={process.env.NEYNAR_CLIENT_ID || ''}
           isSecured={!process.env.NOT_SECURED}
           disableImageCompression={!!process.env.DISABLE_IMAGE_COMPRESSION}
           disableXAnalytics={!!process.env.DISABLE_X_ANALYTICS}
-          sentryDsn={process.env.NEXT_PUBLIC_SENTRY_DSN!}
-          language={allHeaders.get(headerName)}
+          sentryDsn={process.env.NEXT_PUBLIC_SENTRY_DSN || ''}
+          language={allHeaders.get(headerName) || 'en'}
           transloadit={
             process.env.TRANSLOADIT_AUTH && process.env.TRANSLOADIT_TEMPLATE
               ? [
@@ -78,25 +79,27 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               : []
           }
         >
-          <SentryComponent>
-            {/*<SetTimezone />*/}
-            <HtmlComponent />
-            <ToltScript />
-            <FacebookComponent />
-            <Plausible
-              domain={!!process.env.IS_GENERAL ? 'postiz.com' : 'gitroom.com'}
-            >
-              <PHProvider
-                phkey={process.env.NEXT_PUBLIC_POSTHOG_KEY}
-                host={process.env.NEXT_PUBLIC_POSTHOG_HOST}
+          <ErrorBoundary>
+            <SentryComponent>
+              {/*<SetTimezone />*/}
+              <HtmlComponent />
+              <ToltScript />
+              <FacebookComponent />
+              <Plausible
+                domain={!!process.env.IS_GENERAL ? 'postiz.com' : 'gitroom.com'}
               >
-                <LayoutContext>
-                  <UtmSaver />
-                  {children}
-                </LayoutContext>
-              </PHProvider>
-            </Plausible>
-          </SentryComponent>
+                <PHProvider
+                  phkey={process.env.NEXT_PUBLIC_POSTHOG_KEY}
+                  host={process.env.NEXT_PUBLIC_POSTHOG_HOST}
+                >
+                  <LayoutContext>
+                    <UtmSaver />
+                    {children}
+                  </LayoutContext>
+                </PHProvider>
+              </Plausible>
+            </SentryComponent>
+          </ErrorBoundary>
         </VariableContextComponent>
       </body>
     </html>
