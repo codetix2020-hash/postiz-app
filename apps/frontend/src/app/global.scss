@@ -11,6 +11,71 @@ body {
   color: var(--new-btn-text);
 }
 
+/* Force light mode visibility fixes */
+body.light {
+  background: #f0f2f4 !important;
+  color: #0e0e0e !important;
+}
+
+/* Ensure all text is visible in light mode */
+body.light,
+body.light * {
+  color: inherit;
+}
+
+/* Ensure buttons are visible */
+body.light button,
+body.light .btn,
+body.light [role="button"],
+body.light [type="button"],
+body.light [type="submit"] {
+  background-color: #612bd3 !important;
+  color: white !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+}
+
+body.light button:hover,
+body.light .btn:hover {
+  opacity: 0.9 !important;
+}
+
+/* Ensure text inputs are visible */
+body.light input,
+body.light textarea,
+body.light select {
+  background-color: #ffffff !important;
+  color: #0e0e0e !important;
+  border: 1px solid #e7e9eb !important;
+  padding: 8px 12px !important;
+}
+
+/* Ensure links are visible */
+body.light a {
+  color: #612bd3 !important;
+  text-decoration: underline !important;
+}
+
+/* Ensure cards/boxes are visible */
+body.light [class*="bg-"],
+body.light [class*="bg-new"] {
+  background-color: #ffffff !important;
+  color: #0e0e0e !important;
+}
+
+/* Ensure borders are visible */
+body.light [class*="border"] {
+  border-color: #e7e9eb !important;
+}
+
+/* Override dark mode if accidentally applied */
+body.dark {
+  background: #0e0e0e !important;
+  color: #ffffff !important;
+}
+
 body * {
   outline: none !important;
 }

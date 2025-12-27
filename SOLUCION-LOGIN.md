@@ -194,3 +194,6 @@ Después de aplicar las soluciones:
 3. Frontend puede leer cookies y hacer requests autenticados
 4. Usuario puede conectar cuentas sociales
 
+
+
+

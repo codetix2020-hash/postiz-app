@@ -160,3 +160,6 @@ O usar el script TypeScript en `scripts/create-test-integrations.ts` como refere
 4. Probar login nuevamente
 5. Si no funciona, usar script SQL directo para crear usuarios
 
+
+
+
