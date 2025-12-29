@@ -69,7 +69,8 @@ const nextConfig = {
 // Only use Sentry if all required variables are present
 const useSentry = process.env.SENTRY_ORG && 
                   process.env.SENTRY_PROJECT && 
-                  process.env.SENTRY_AUTH_TOKEN;
+                  process.env.SENTRY_AUTH_TOKEN &&
+                  process.env.NEXT_PUBLIC_SENTRY_DSN;
 
 let finalConfig = nextConfig;
 
@@ -119,18 +120,18 @@ if (useSentry) {
 
       // Error handling for CI/CD
       errorHandler: (error) => {
-        console.warn("Sentry build error occurred:", error.message);
+        console.warn("Sentry build error occurred:", error instanceof Error ? error.message : String(error));
         console.warn("This might be due to missing Sentry environment variables or network issues");
         // Don't fail the build if Sentry upload fails in monorepo context
         return;
       },
     });
   } catch (error) {
-    console.warn('Failed to configure Sentry, using default config:', error.message);
+    console.warn('Failed to configure Sentry, using default config:', error instanceof Error ? error.message : String(error));
     finalConfig = nextConfig;
   }
 } else {
-  console.warn('Sentry not configured, skipping Sentry setup');
+  console.warn('Sentry not configured (missing required env vars), skipping Sentry setup');
 }
 
 export default finalConfig;
