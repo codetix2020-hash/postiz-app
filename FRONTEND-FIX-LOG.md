@@ -192,3 +192,4 @@ Después de estos cambios:
 - El CSS puede necesitar ajustes adicionales según el tema usado
 - Se recomienda configurar todas las variables de entorno en Railway para funcionalidad completa
 
+
